@@ -119,10 +119,10 @@ public class LocalidadRepository implements CrudRepository<LocalidadEntity, Long
     }
     
     @Override
-    public void delete(Long id) {
+    public void delete(LocalidadEntity t) {
         
         Map<String, Object> params = new HashMap<>();
-        params.put("id", id);
+        params.put("id", t.getId());
     
         namedParameterJdbcTemplate.queryForObject(SQL_DELETE, params, rowMapper);
     }

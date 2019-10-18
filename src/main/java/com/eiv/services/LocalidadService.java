@@ -47,6 +47,10 @@ public class LocalidadService {
     }
     
     public void borrar(Long id) {
-        localidadRepository.delete(id);
+        
+        LocalidadEntity localidad = localidadRepository.findById(id).orElseThrow(
+                () -> new RuntimeException("Localidad no encontrada"));
+        
+        localidadRepository.delete(localidad);
     }
 }

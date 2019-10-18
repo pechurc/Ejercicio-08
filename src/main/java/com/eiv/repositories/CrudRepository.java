@@ -11,5 +11,5 @@ public interface CrudRepository<T, I> {
     
     void save(T t);
     
-    void delete(I id);
+    void delete(T t);
 }

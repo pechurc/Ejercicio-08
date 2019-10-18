@@ -23,7 +23,9 @@ public class ProvinciaRepository implements CrudRepository<ProvinciaEntity, Long
     private static final String SQL_FIND_ALL = "SELECT * FROM provincias";
     private static final String SQL_INSERT = "INSERT INTO provincias (id, nombre) "
             + "VALUES (:id, :nombre);";
-    private static final String SQL_DELETE = "DELETR FROM provincias WHERE id=:id";
+    private static final String SQL_UPDATE = "UPDATE provincias set nombre=:nombre WHERE "
+            + "id=:id;";
+    private static final String SQL_DELETE = "DELETE FROM provincias WHERE id=:id";
   
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     
@@ -66,20 +68,34 @@ public class ProvinciaRepository implements CrudRepository<ProvinciaEntity, Long
     @Override
     public void save(ProvinciaEntity t) {
           
+        Optional<ProvinciaEntity> optional = findById(t.getId());
         Map<String, Object> parameters = new HashMap<String, Object>();
         
-        parameters.put("id", t.getId());
-        parameters.put("nombre", t.getNombre());
+        if (optional.isPresent()) {
+            ProvinciaEntity provincia = optional.get();
+            
+            if (provincia.getNombre() != t.getNombre()) {
+                provincia.setNombre(t.getNombre());
+            }
+            
+            parameters.put("id", provincia.getId());
+            parameters.put("nombre", provincia.getNombre());
+            
+            namedParameterJdbcTemplate.update(SQL_UPDATE, parameters);
+        } else {
+            parameters.put("id", t.getId());
+            parameters.put("nombre", t.getNombre());
 
-        namedParameterJdbcTemplate.update(SQL_INSERT, parameters);
+            namedParameterJdbcTemplate.update(SQL_INSERT, parameters);
+        }
     }
     
     @Override
-    public void delete(Long id) {
+    public void delete(ProvinciaEntity entity) {
         
         Map<String, Object> parameters = new HashMap<String, Object>();
         
-        parameters.put("id", id);
+        parameters.put("id", entity.getId());
 
         namedParameterJdbcTemplate.update(SQL_DELETE, parameters);
     }
