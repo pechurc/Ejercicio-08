@@ -19,7 +19,7 @@ import com.eiv.entities.ProvinciaEntity;
 import com.eiv.repositories.LocalidadRepository;
 
 @RunWith(MockitoJUnitRunner.class)
-public class LocalidadServiceIT {
+public class LocalidadServiceTest {
     
     @Mock 
     ProvinciaService provinciaService;

@@ -18,7 +18,7 @@ import com.eiv.entities.ProvinciaEntity;
 import com.eiv.repositories.ProvinciaRepository;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ProvinciaServiceIT {
+public class ProvinciaServiceTest {
 
     @Mock
     ProvinciaRepository provinciaRepository;
