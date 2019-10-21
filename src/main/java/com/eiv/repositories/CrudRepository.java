@@ -7,6 +7,8 @@ public interface CrudRepository<T, I> {
     
     Optional<T> findById(I id);
     
+    Optional<I> maxId();
+    
     List<T> findAll();
     
     void save(T t);

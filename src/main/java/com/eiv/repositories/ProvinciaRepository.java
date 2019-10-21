@@ -10,6 +10,7 @@ import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -26,7 +27,7 @@ public class ProvinciaRepository implements CrudRepository<ProvinciaEntity, Long
     private static final String SQL_UPDATE = "UPDATE provincias set nombre=:nombre WHERE "
             + "id=:id;";
     private static final String SQL_DELETE = "DELETE FROM provincias WHERE id=:id";
-  
+    private static final String SQL_MAX_ID = "SELECT MAX(id) FROM provincias;";
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     
     private final RowMapper<ProvinciaEntity> rowMapper = (rs, row) -> {
@@ -71,6 +72,8 @@ public class ProvinciaRepository implements CrudRepository<ProvinciaEntity, Long
         Optional<ProvinciaEntity> optional = findById(t.getId());
         Map<String, Object> parameters = new HashMap<String, Object>();
         
+        parameters.put("nombre", t.getNombre());
+        
         if (optional.isPresent()) {
             ProvinciaEntity provincia = optional.get();
             
@@ -79,12 +82,12 @@ public class ProvinciaRepository implements CrudRepository<ProvinciaEntity, Long
             }
             
             parameters.put("id", provincia.getId());
-            parameters.put("nombre", provincia.getNombre());
             
             namedParameterJdbcTemplate.update(SQL_UPDATE, parameters);
         } else {
-            parameters.put("id", t.getId());
-            parameters.put("nombre", t.getNombre());
+            Long id = t.getId() == null ? maxId().orElse(0L) + 1L : t.getId();
+            
+            parameters.put("id", id); 
 
             namedParameterJdbcTemplate.update(SQL_INSERT, parameters);
         }
@@ -106,5 +109,18 @@ public class ProvinciaRepository implements CrudRepository<ProvinciaEntity, Long
 
     public void setJdbcTemplate(NamedParameterJdbcTemplate jdbcTemplate) {
         this.namedParameterJdbcTemplate = jdbcTemplate;
+    }
+    
+    @Override
+    public Optional<Long> maxId() {
+
+        JdbcTemplate jdbcTemplate = namedParameterJdbcTemplate.getJdbcTemplate();
+        Long maxId = jdbcTemplate.queryForObject(SQL_MAX_ID, Long.class);
+        
+        if (maxId == null) {
+            return Optional.empty();
+        } else {
+            return Optional.of(maxId);
+        }
     }
 }

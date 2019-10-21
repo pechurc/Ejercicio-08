@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.eiv.dtos.LocalidadDto;
 import com.eiv.entities.LocalidadEntity;
+import com.eiv.entities.ProvinciaEntity;
 import com.eiv.repositories.LocalidadRepository;
 
 @Service
@@ -35,11 +36,11 @@ public class LocalidadService {
     
     public LocalidadEntity nueva(LocalidadDto dto) {
         
-        provinciaService.findById(dto.getProvinciaId()).orElseThrow(
+        ProvinciaEntity provincia = provinciaService.findById(dto.getProvinciaId()).orElseThrow(
                 () -> new RuntimeException("Provincia no encontrada"));
         
         LocalidadEntity nuevaLocalidad = new LocalidadEntity(dto.getId(), 
-                dto.getNombre(), dto.getProvinciaId());
+                dto.getNombre(), provincia);
         
         localidadRepository.save(nuevaLocalidad);
         

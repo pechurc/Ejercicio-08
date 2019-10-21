@@ -64,7 +64,7 @@ public class App {
         
         System.out.println("\nInsertamos una provincia");
         // Crea una provincia
-        ProvinciaDtoImpl nuevaProvincia = new ProvinciaDtoImpl("Mendoza");        
+        ProvinciaDtoImpl nuevaProvincia = new ProvinciaDtoImpl(10L, "Mendoza");        
         provinciaService.nueva(nuevaProvincia);
         
         // Recupera todas las provincias

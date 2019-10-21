@@ -10,25 +10,32 @@ import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import com.eiv.entities.LocalidadEntity;
+import com.eiv.entities.ProvinciaEntity;
 
 @Repository
 public class LocalidadRepository implements CrudRepository<LocalidadEntity, Long> {
     
-    private static final String SQL_FIND_BY_ID = "SELECT * FROM localidades WHERE id=:id";
-    private static final String SQL_FIND_BY_PROVINCIA = "SELECT * FROM localidades "
-            + "WHERE provinciaId=:provinciaId";
-    private static final String SQL_FIND_ALL = "SELECT * FROM localidades";
-    private static final String SQL_INSERT = "INSERT INTO localidades (nombre, provinciaId)"
-            + " VALUES (:nombre, :provinciaId);";
-    private static final String SQL_UPDATE = "UPDATE localidades SET nombre=:nombre, "
-            + "provinciaId=:provinciaId WHERE id=:id;";
+    private static final String SQL_FIND_BY_ID = "SELECT l.id, l.nombre, p.id as p_id, p.nombre"
+            + " as p_nombre FROM localidades as l INNER JOIN provincias as p ON p.id=l.provinciaId"
+            + " WHERE l.id=:id";
+    private static final String SQL_FIND_BY_PROVINCIA = "SELECT l.id, l.nombre, p.id as p_id,"
+            + " p.nombre as p_nombre FROM localidades as l INNER JOIN provincias as p"
+            + " ON p.id=l.provinciaId"
+            + " WHERE provinciaId=:provinciaId";
+    private static final String SQL_FIND_ALL = "SELECT l.id, l.nombre, p.id as p_id, p.nombre"
+            + " as p_nombre FROM localidades as l INNER JOIN provincias as p ON p.id=l.provinciaId";
+    private static final String SQL_INSERT = "INSERT INTO localidades (id, nombre, provinciaId)"
+            + " VALUES (:id, :nombre, :provinciaId);";
+    private static final String SQL_UPDATE = "UPDATE localidades SET nombre=:nombre,"
+            + " provinciaId=:provinciaId WHERE id=:id;";
     private static final String SQL_DELETE = "DELETE FROM localidades WHERE id=:id";
-    
+    private static final String SQL_MAX_ID = "SELECT MAX(id) FROM localidades;";
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     
     @Autowired
@@ -40,10 +47,12 @@ public class LocalidadRepository implements CrudRepository<LocalidadEntity, Long
     }
     
     private final RowMapper<LocalidadEntity> rowMapper = (rs, row) -> {
-        long id = rs.getLong("id");
+        Long id = rs.getLong("id");
         String nombre = rs.getString("nombre");
-        long provinciaId = rs.getLong("provinciaId");
-        return new LocalidadEntity(id, nombre, provinciaId);
+        ProvinciaEntity provincia = new ProvinciaEntity();
+        provincia.setId(rs.getLong("p_id"));
+        provincia.setNombre(rs.getString("p_nombre"));
+        return new LocalidadEntity(id, nombre, provincia);
     };
     
     @Override
@@ -89,18 +98,18 @@ public class LocalidadRepository implements CrudRepository<LocalidadEntity, Long
         Map<String, Object> parameters = new HashMap<String, Object>();
         
         parameters.put("nombre", t.getNombre());
-        parameters.put("provinciaId", t.getProvinciaId());
+        parameters.put("provinciaId", t.getProvincia().getId());
         
         if (optional.isPresent()) {
             LocalidadEntity localidad = optional.get();
             
             parameters.put("id", localidad.getId());        
             
-            if (t.getProvinciaId() != localidad.getProvinciaId()) {
+            if (t.getProvincia() != localidad.getProvincia()) {
                 provinciaRepository
-                        .findById(localidad.getProvinciaId())
+                        .findById(localidad.getProvincia().getId())
                         .ifPresent(p -> {
-                            localidad.setProvinciaId(p.getId()); 
+                            localidad.setProvincia(p); 
                         });                
             }
             if (t.getNombre() != localidad.getNombre()) {
@@ -108,12 +117,13 @@ public class LocalidadRepository implements CrudRepository<LocalidadEntity, Long
             }
             
             parameters.put("nombre", localidad.getNombre());
-            parameters.put("provinciaId", localidad.getProvinciaId());
+            parameters.put("provinciaId", localidad.getProvincia().getId());
             
             namedParameterJdbcTemplate.update(SQL_UPDATE, parameters);  
         } else {
-            parameters.put("nombre", t.getNombre());
-            parameters.put("provinciaId", t.getProvinciaId());
+            Long id = t.getId() == null ? maxId().orElse(0L) + 1L : t.getId();
+            
+            parameters.put("id", id); 
             namedParameterJdbcTemplate.update(SQL_INSERT, parameters);
         }
     }
@@ -133,5 +143,18 @@ public class LocalidadRepository implements CrudRepository<LocalidadEntity, Long
 
     public void setJdbcTemplate(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
+    }
+
+    @Override
+    public Optional<Long> maxId() {
+
+        JdbcTemplate jdbcTemplate = namedParameterJdbcTemplate.getJdbcTemplate();
+        Long maxId = jdbcTemplate.queryForObject(SQL_MAX_ID, Long.class);
+        
+        if (maxId == null) {
+            return Optional.empty();
+        } else {
+            return Optional.of(maxId);
+        }
     }
 }

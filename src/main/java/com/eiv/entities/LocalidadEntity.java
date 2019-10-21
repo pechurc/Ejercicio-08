@@ -3,17 +3,17 @@ package com.eiv.entities;
 public class LocalidadEntity {
     private Long id;
     private String nombre;
-    private Long provinciaId;
+    private ProvinciaEntity provincia;
     
     public LocalidadEntity() {
         
     }
     
-    public LocalidadEntity(Long id, String nombre, Long provinciaId) {
+    public LocalidadEntity(Long id, String nombre, ProvinciaEntity provincia) {
         super();
         this.id = id;
         this.nombre = nombre;
-        this.provinciaId = provinciaId;
+        this.provincia = provincia;
     }
 
     public Long getId() {
@@ -32,18 +32,18 @@ public class LocalidadEntity {
         this.nombre = nombre;
     }    
 
-    public Long getProvinciaId() {
-        return provinciaId;
+    public ProvinciaEntity getProvincia() {
+        return provincia;
     }
 
-    public void setProvinciaId(Long provinciaId) {
-        this.provinciaId = provinciaId;
+    public void setProvincia(ProvinciaEntity provincia) {
+        this.provincia = provincia;
     }
     
     @Override
     public String toString() {
-        return "LocalidadEntity [id=" + id + ", nombre=" + nombre + ", provinciaId=" + provinciaId 
-                + "]";
+        return "LocalidadEntity [id=" + id + ", nombre=" + nombre + ", provincia=" + provincia
+                .toString() + "]";
     }
 
     @Override
