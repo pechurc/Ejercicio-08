@@ -42,17 +42,10 @@ public class ProvinciaRepositoryIT {
         @Bean
         public PlatformTransactionManager transactionManager() {
             return new DataSourceTransactionManager(getDataSource());
-        }
-        
-        @Bean
-        public ProvinciaRepository getProvinciaRepository() {
-            return new ProvinciaRepository(getDataSource());
-        }
+        }        
     }
     
-    
     @Autowired DataSource dataSource;
-    @Autowired ProvinciaRepository provinciaRepository;
     
     @Test
     public void whenProvinciaId1_thenIsPresent() {

@@ -1,6 +1,5 @@
 package com.eiv.repositories;
 
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,8 +41,12 @@ public class LocalidadRepository implements CrudRepository<LocalidadEntity, Long
     private ProvinciaRepository provinciaRepository;
     
     @Autowired
-    public LocalidadRepository(DataSource dataSource) throws SQLException {
+    public LocalidadRepository(DataSource dataSource) {
         namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);      
+    }
+    
+    public void setProvinciaRepository(ProvinciaRepository provinciaRepository) {
+        this.provinciaRepository = provinciaRepository;
     }
     
     private final RowMapper<LocalidadEntity> rowMapper = (rs, row) -> {
@@ -122,6 +125,7 @@ public class LocalidadRepository implements CrudRepository<LocalidadEntity, Long
             namedParameterJdbcTemplate.update(SQL_UPDATE, parameters);  
         } else {
             Long id = t.getId() == null ? maxId().orElse(0L) + 1L : t.getId();
+            t.setId(id);
             
             parameters.put("id", id); 
             namedParameterJdbcTemplate.update(SQL_INSERT, parameters);
@@ -134,7 +138,7 @@ public class LocalidadRepository implements CrudRepository<LocalidadEntity, Long
         Map<String, Object> params = new HashMap<>();
         params.put("id", t.getId());
     
-        namedParameterJdbcTemplate.queryForObject(SQL_DELETE, params, rowMapper);
+        namedParameterJdbcTemplate.update(SQL_DELETE, params);
     }
     
     public NamedParameterJdbcTemplate getJdbcTemplate() {
