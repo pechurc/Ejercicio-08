@@ -65,7 +65,7 @@ public class App {
         System.out.println("\nInsertamos una provincia");
         // Crea una provincia
         ProvinciaDtoImpl nuevaProvincia = new ProvinciaDtoImpl(10L, "Mendoza");        
-        provinciaService.nueva(nuevaProvincia);
+        provinciaService.create(nuevaProvincia);
         
         // Recupera todas las provincias
         provincias = provinciaService.buscarTodas();
@@ -94,7 +94,7 @@ public class App {
         System.out.println("\nInsertamos una localidad");
         // Crea una localidad nueva 
         LocalidadDtoImpl nuevaLocalidad = new LocalidadDtoImpl("Cordoba", 3L);
-        localidadService.nueva(nuevaLocalidad);
+        localidadService.create(nuevaLocalidad);
         
         // Recupera todas las localidades 
         localidades = localidadService.buscarTodas();

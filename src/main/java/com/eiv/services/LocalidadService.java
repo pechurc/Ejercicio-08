@@ -34,17 +34,36 @@ public class LocalidadService {
         return localidadRepository.findAllByProvincia(provinciaId);
     }
     
-    public LocalidadEntity nueva(LocalidadDto dto) {
+    public LocalidadEntity create(LocalidadDto dto) {
         
+        Long id = dto.getId();
+        if (id == null) {
+            id = localidadRepository.maxId().orElse(0L) + 1;
+        }
+
         ProvinciaEntity provincia = provinciaService.findById(dto.getProvinciaId()).orElseThrow(
                 () -> new RuntimeException("Provincia no encontrada"));
         
-        LocalidadEntity nuevaLocalidad = new LocalidadEntity(dto.getId(), 
-                dto.getNombre(), provincia);
+        LocalidadEntity nuevaLocalidad = new LocalidadEntity(id, dto.getNombre(), provincia);
         
         localidadRepository.save(nuevaLocalidad);
         
         return nuevaLocalidad;
+    }
+    
+    public LocalidadEntity update(Long id, LocalidadDto dto) {
+        
+        LocalidadEntity localidadEntity = findById(id).orElseThrow(
+                () -> new RuntimeException("Localidad no encontrada"));
+        ProvinciaEntity provincia = provinciaService.findById(dto.getProvinciaId()).orElseThrow(
+                () -> new RuntimeException("Provincia no encontrada"));
+        
+        localidadEntity.setNombre(dto.getNombre());
+        localidadEntity.setProvincia(provincia);
+        
+        localidadRepository.save(localidadEntity);
+        
+        return localidadEntity;
     }
     
     public void borrar(Long id) {

@@ -14,8 +14,12 @@ import com.eiv.repositories.ProvinciaRepository;
 @Service
 public class ProvinciaService {
 
-    @Autowired
     private ProvinciaRepository provinciaRepository;
+    
+    @Autowired
+    public ProvinciaService(ProvinciaRepository provinciaRepository) {
+        this.provinciaRepository = provinciaRepository;
+    }
     
     @Transactional(readOnly = true)
     public Optional<ProvinciaEntity> findById(Long id) {
@@ -23,8 +27,27 @@ public class ProvinciaService {
     }
     
     @Transactional
-    public ProvinciaEntity nueva(ProvinciaDto dto) {
-        ProvinciaEntity nuevaProvincia = new ProvinciaEntity(dto.getId(), dto.getNombre());
+    public ProvinciaEntity update(Long id, ProvinciaDto dto) {
+        ProvinciaEntity provinciaEntity = findById(id)
+                .orElseThrow(() -> new RuntimeException(
+                        String.format("No existe la provincia con Id %s", id)));
+        
+        provinciaEntity.setNombre(dto.getNombre());
+        
+        provinciaRepository.save(provinciaEntity);
+        
+        return provinciaEntity;
+    }
+    
+    @Transactional
+    public ProvinciaEntity create(ProvinciaDto dto) {
+        
+        Long id = dto.getId();
+        if (id == null) {
+            id = provinciaRepository.maxId().orElse(0L) + 1;
+        }
+
+        ProvinciaEntity nuevaProvincia = new ProvinciaEntity(id, dto.getNombre());
         
         provinciaRepository.save(nuevaProvincia);
         
@@ -40,7 +63,7 @@ public class ProvinciaService {
     public void borrar(Long id) {
         
         ProvinciaEntity provincia = provinciaRepository.findById(id).orElseThrow(
-                () -> new RuntimeException(String.format("No existe la provincia con id %s", id)));
+                () -> new RuntimeException(String.format("No existe la provincia con Id %s", id)));
         
         provinciaRepository.delete(provincia);
     }

@@ -1,6 +1,5 @@
 package com.eiv.repositories;
 
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,7 +36,7 @@ public class ProvinciaRepository implements CrudRepository<ProvinciaEntity, Long
     };
     
     @Autowired
-    public ProvinciaRepository(DataSource dataSource) throws SQLException {
+    public ProvinciaRepository(DataSource dataSource) {
         namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);   
     }
     
@@ -86,7 +85,7 @@ public class ProvinciaRepository implements CrudRepository<ProvinciaEntity, Long
             namedParameterJdbcTemplate.update(SQL_UPDATE, parameters);
         } else {
             Long id = t.getId() == null ? maxId().orElse(0L) + 1L : t.getId();
-            
+            t.setId(id);
             parameters.put("id", id); 
 
             namedParameterJdbcTemplate.update(SQL_INSERT, parameters);
